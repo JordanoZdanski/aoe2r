@@ -22,7 +22,6 @@
 #' get_player_profile(alias = "TAG_MbL_")
 #' }
 get_player_profile <- function(profile_id = NULL, alias = NULL) {
-  # Regra do backend: um identificador por request.
   if (is.null(profile_id) == is.null(alias)) {
     stop("Supply exactly one of `profile_id` or `alias`.",
          call. = FALSE)

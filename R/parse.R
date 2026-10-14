@@ -1,5 +1,4 @@
-# Parse: resposta do servidor -> tibble, sem rede. `parse_*` sao puras e
-# testaveis offline; `get_*` sao as funcoes publicas.
+# Parsers puros permitem testes sem rede.
 
 # O backend manda epoch Unix em inteiro cru, nao em texto ISO.
 ao_as_date <- function(x) {
@@ -9,11 +8,9 @@ ao_as_date <- function(x) {
   as.POSIXct(as.numeric(x), origin = "1970-01-01", tz = "UTC")
 }
 
-# Abre um campo de uma linha de data.frame. `members` chega como lista-columna.
+# `members` chega como lista-coluna de data.frames de uma linha.
 ao_first <- function(df, column) df[[column]][[1]]
 
-
-# --- getAvailableLeaderboards ------------------------------------------------
 
 parse_leaderboards <- function(payload) {
   lb <- payload$leaderboards
@@ -34,7 +31,6 @@ parse_leaderboards <- function(payload) {
   )
 }
 
-# Civilizacoes vem no mesmo payload, em `races`, e ja com nome.
 parse_civilizations <- function(payload) {
   tibble::tibble(
     civilization_id = as.integer(payload$races$id),
@@ -43,12 +39,7 @@ parse_civilizations <- function(payload) {
 }
 
 
-# --- getLeaderBoard2 e getPersonalStat ---------------------------------------
-
-# Ambos devolvem `statGroups` (quem e o jogador) e `leaderboardStats` (seus
-# numeros) em arrays paralelos ligados por `statgroup_id` -- e em ordens
-# diferentes. Unir por posicao daria o rating de um jogador no nome de outro,
-# sem erro e sem NA, entao o match() por chave e obrigatorio.
+# Os arrays chegam em ordens diferentes; unir por chave evita trocar jogadores.
 parse_leaderboard <- function(payload) {
   stats <- payload$leaderboardStats
   groups <- payload$statGroups
@@ -71,8 +62,7 @@ parse_leaderboard <- function(payload) {
   )
 }
 
-# Identidade: apelido, pais, nivel e SteamID64 (dentro do campo `name`, que
-# vem como "/steam/76561198...").
+# SteamID64 vem no prefixo /steam do campo name.
 parse_profiles <- function(payload) {
   prof <- payload$profiles
   if (is.null(prof)) {
@@ -92,7 +82,6 @@ parse_profiles <- function(payload) {
   )
 }
 
-# Uma linha por ladder do jogador, com os dados de identidade repetidos.
 parse_player_profile <- function(payload) {
   ladder <- parse_leaderboard(payload)
   who <- payload$statGroups$members[[1]]
@@ -115,8 +104,6 @@ parse_player_profile <- function(payload) {
   )
 }
 
-
-# --- getRecentMatchHistory ---------------------------------------------------
 
 parse_matches <- function(payload) {
   matches <- payload$matchHistoryStats
@@ -172,9 +159,7 @@ parse_matches <- function(payload) {
   )
 }
 
-# Formato preservado mesmo vazio, para nao quebrar um pipeline no meio.
-# Colunas a mao de proposito: nao podem vir de parse_matches(), que e quem
-# chama esta funcao quando o jogador nao tem partidas.
+# Colunas escritas aqui evitam recursao quando nao ha partidas.
 empty_matches <- function() {
   tibble::tibble(
     match_id        = integer(),

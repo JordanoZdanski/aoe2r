@@ -1,5 +1,4 @@
-# Infraestrutura do servidor em um lugar so (regra de ouro n. 2).
-# O host ja mudou pelo menos duas vezes; quando mudar de novo, e aqui.
+# Host centralizado porque o backend pode migrar.
 
 AOE2_HOST <- "https://aoe-api.worldsedgelink.com"
 AOE2_PATH <- "community/leaderboard"

@@ -1,5 +1,4 @@
-# Porta de entrada HTTP. Nenhuma funcao publica chama httr::GET direto
-# (regra de ouro n. 3): retry, cache e fallback entram aqui depois.
+# Centraliza HTTP para manter funcoes publicas sem transporte.
 
 ao_request <- function(endpoint, query = list()) {
   url <- httr::modify_url(
@@ -20,9 +19,7 @@ ao_request <- function(endpoint, query = list()) {
   payload
 }
 
-# Erros vem como HTTP 200 + result.code (code 5 = leaderboard inexistente,
-# code 7 = profile_id invalido). Sem esta checagem o usuario receberia um
-# tibble vazio sem explicacao.
+# Erros de dominio chegam em HTTP 200; verificar result.code.
 ao_check_result <- function(payload, endpoint) {
   result <- payload$result
 
@@ -40,5 +37,5 @@ ao_check_result <- function(payload, endpoint) {
   invisible(payload)
 }
 
-# R nao tem "ou" para valores ausentes fora do ggplot2.
+# Alternativa para NULL.
 `%||%` <- function(x, y) if (is.null(x)) y else x
