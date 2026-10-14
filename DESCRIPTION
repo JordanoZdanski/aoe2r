@@ -1,6 +1,6 @@
 Package: aoe2r
 Title: Data Access for Age of Empires II: Definitive Edition
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Jordano", "Zdanski", , "jordano.zdanski@acad.ufsm.br", role = c("aut", "cre"))
   )
