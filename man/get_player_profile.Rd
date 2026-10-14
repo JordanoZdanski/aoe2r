@@ -15,7 +15,7 @@ get_player_profile(profile_id = NULL, alias = NULL)
 A tibble with one row per ladder: \code{profile_id}, \code{alias}, \code{country},
 \code{level}, \code{steam_id}, \code{leaderboard_id}, \code{rank}, \code{rating}, \code{wins},
 \code{losses}, \code{streak}, \code{drops}, \code{rank_total} and \code{last_match}.
-A \code{rank} of \code{-1} means the player is ranked on that ladder.
+A \code{rank} of \code{-1} means the player is not ranked on that ladder.
 }
 \description{
 Looks a player up by \code{profile_id} or by in-game \code{alias}, and returns their

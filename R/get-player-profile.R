@@ -14,7 +14,7 @@
 #' @return A tibble with one row per ladder: `profile_id`, `alias`, `country`,
 #'   `level`, `steam_id`, `leaderboard_id`, `rank`, `rating`, `wins`,
 #'   `losses`, `streak`, `drops`, `rank_total` and `last_match`.
-#'   A `rank` of `-1` means the player is ranked on that ladder.
+#'   A `rank` of `-1` means the player is not ranked on that ladder.
 #' @export
 #' @examples
 #' \dontrun{
