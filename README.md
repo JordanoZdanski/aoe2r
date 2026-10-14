@@ -67,6 +67,14 @@ R CMD build .
 _R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.1.0.tar.gz --no-manual
 ```
 
+## Collecting a larger sample
+
+The package API remains limited to its four data-access functions. For an
+analysis-ready sample built from many leaderboard profiles, use the resumable
+collection utility in [`tools/coletar-partidas.R`](tools/coletar-partidas.R).
+It saves checkpoints, retries transient failures, and removes repeated
+player-match rows. See the [collection guide](tools/COLETA-DE-DADOS.md).
+
 ---
 
 # aoe2r
@@ -140,3 +148,12 @@ Rscript -e 'testthat::test_local(".")'
 R CMD build .
 _R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.1.0.tar.gz --no-manual
 ```
+
+## Coletar uma amostra maior
+
+A API do pacote continua limitada as quatro funcoes de acesso a dados. Para
+montar uma amostra pronta para analise a partir de muitos perfis de uma
+leaderboard, use o utilitario retomavel em
+[`tools/coletar-partidas.R`](tools/coletar-partidas.R). Ele salva checkpoints,
+repete falhas transitorias e remove linhas jogador-partida repetidas. Veja o
+[guia de coleta](tools/COLETA-DE-DADOS.md).
