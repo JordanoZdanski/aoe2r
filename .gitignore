@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Pacotes compilados / artefatos de build
+*.Rcheck/
+*.tar.gz
+
+# Builds de teste
+check/
+*.Rout
+*.Rout.fail
