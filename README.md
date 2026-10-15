@@ -97,7 +97,7 @@ directory, run:
 ```bash
 Rscript -e 'testthat::test_local(".")'
 R CMD build .
-_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.0.tar.gz --no-manual
+_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.1.tar.gz --no-manual
 ```
 
 ---
@@ -201,5 +201,5 @@ rede. A partir da pasta do pacote, rode:
 ```bash
 Rscript -e 'testthat::test_local(".")'
 R CMD build .
-_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.0.tar.gz --no-manual
+_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.1.tar.gz --no-manual
 ```
