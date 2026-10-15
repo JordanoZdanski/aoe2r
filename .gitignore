@@ -12,5 +12,8 @@ check/
 *.Rout
 *.Rout.fail
 
-# Dados coletados pelo utilitario em tools/.
+# Dados coletados nao sao versionados.
 dados/
+
+# Projeto local do RStudio
+*.Rproj

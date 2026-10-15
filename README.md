@@ -1,7 +1,7 @@
 # aoe2r
 
-`aoe2r` downloads Age of Empires II: Definitive Edition leaderboard, player
-profile, and recent match-history data into analysis-ready tibbles.
+`aoe2r` downloads Age of Empires II: Definitive Edition data into
+analysis-ready tibbles: leaderboards, player profiles, and match histories.
 
 The package uses the World's Edge backend consumed by the game client. This is
 an unofficial, reverse-engineered service: endpoints and response formats can
@@ -9,52 +9,85 @@ change without notice.
 
 ## Installation
 
-The package is not on CRAN. Install the development version from GitHub:
-
 ```r
 install.packages("remotes")
 remotes::install_github("JordanoZdanski/aoe2r")
 ```
 
-## Usage
+## Quick start
 
 ```r
 library(aoe2r)
 
-# Find the current leaderboard identifiers.
-ladders <- get_available_leaderboards()
+# Current leaderboard identifiers (ladder 3 is 1v1 Random Map).
+get_available_leaderboards()
 
-# Get the top 100 players in the 1v1 Random Map ladder.
-leaderboard <- get_leaderboard(leaderboard_id = 3, count = 100)
+# Top 1000 players of a ladder; pagination is automatic.
+ranking <- get_leaderboard(leaderboard_id = 3, count = 1000)
 
-# Get every recent completed match involving a player.
-# The result has one row per player per match.
-matches <- get_player_matches(profile_id = 6174996)
+# Recent matches of any number of players; requests are batched
+# automatically and repeated rows are removed.
+matches <- get_player_matches(ranking$profile_id[1:100])
 
-# Look up a player and their standing on every ladder.
-profile <- get_player_profile(profile_id = 251265)
+# A player's standing on every ladder (or use alias = "TAG_MbL_").
+get_player_profile(profile_id = 251265)
 ```
 
-`get_player_profile()` also accepts an exact, case-sensitive `alias`:
+## Building a dataset
+
+One call collects the recent history of many leaderboard players:
 
 ```r
-get_player_profile(alias = "TAG_MbL_")
+dataset <- collect_match_dataset(
+  leaderboard_id = 3,
+  n_profiles = 1000,
+  path = "data/collection-rm",   # checkpoints; use NULL to keep it in memory
+  resume = TRUE
+)
 ```
 
-Aliases are not unique. An alias lookup can return several players, so use
-`profile_id` when an unambiguous identifier is available.
+The result is a tibble with one row per player per match, deduplicated by
+`match_id` + `profile_id`. Save it once and share the file:
 
-## Main functions
+```r
+save_match_dataset(dataset, "data/dataset-rm.rds")
+
+# Anyone can reproduce your analysis from the same snapshot:
+dataset <- readRDS("data/dataset-rm.rds")
+```
+
+## Live data vs. reproducibility
+
+The backend is a live service: calling `collect_match_dataset()` again on
+another day returns the state available at that time, which may differ from a
+previous collection. Two guarantees follow:
+
+- **Reproducible analysis** — share the saved RDS snapshot; it always contains
+  the same rows.
+- **Fresh data** — call the collection again (use a new `path` for a fresh
+  checkpoint set). There is no seed that freezes the server.
+
+A `path` that already exists is resumed, not silently refreshed.
+
+## Notes for machine learning
+
+- Split training and test sets **by `match_id`**: players of the same match
+  belong in the same fold.
+- Do not use post-match columns (`rating_after`, `rating_change`,
+  `duration_s`, `xp_gained`) as predictors of the match result.
+- Dates are `POSIXct` in UTC; a `rank` of `-1` in a player profile means the
+  player is unranked on that ladder.
+
+## Functions
 
 | Function | Returns |
 |---|---|
 | `get_available_leaderboards()` | One row per available ranked ladder. |
-| `get_leaderboard()` | One row per player in a ladder. |
-| `get_player_matches()` | One row per player per completed match. |
+| `get_leaderboard()` | One row per player in a ladder; `count` over 200 is paginated. |
+| `get_player_matches()` | One row per player per completed match; inputs over 10 ids are batched. |
 | `get_player_profile()` | One row per ladder associated with a player. |
-
-Dates are returned as `POSIXct` in UTC. A `rank` of `-1` in a player profile
-means that the player is not ranked on that ladder.
+| `collect_match_dataset()` | A deduplicated player-match dataset, with optional checkpoints. |
+| `save_match_dataset()` | Writes a dataset to an RDS file without overwriting by accident. |
 
 ## Development
 
@@ -67,20 +100,12 @@ R CMD build .
 _R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.0.tar.gz --no-manual
 ```
 
-## Collecting a larger sample
-
-For an analysis-ready dataset built from many leaderboard profiles, use
-`collect_match_dataset()`. It handles pagination, retries, checkpointing, and
-deduplication automatically. Save the result with `save_match_dataset()` to
-share or resume later.
-
 ---
 
 # aoe2r
 
-`aoe2r` baixa dados de leaderboard, perfil de jogador e histórico recente de
-partidas de Age of Empires II: Definitive Edition para tibbles prontos para
-análise.
+`aoe2r` baixa dados de Age of Empires II: Definitive Edition para tibbles
+prontos para análise: leaderboards, perfis de jogador e históricos de partidas.
 
 O pacote usa o backend da World's Edge consumido pelo cliente do jogo. Trata-se
 de um serviço não oficial, obtido por engenharia reversa: endpoints e formatos
@@ -88,54 +113,85 @@ de resposta podem mudar sem aviso.
 
 ## Instalação
 
-O pacote ainda não está no CRAN. Instale a versão de desenvolvimento pelo
-GitHub:
-
 ```r
 install.packages("remotes")
 remotes::install_github("JordanoZdanski/aoe2r")
 ```
 
-## Uso
+## Começo rápido
 
 ```r
 library(aoe2r)
 
-# Descobre os identificadores atuais das ladders.
-ladders <- get_available_leaderboards()
+# Identificadores atuais das ladders (a 3 e 1v1 Random Map).
+get_available_leaderboards()
 
-# Traz os 100 melhores jogadores da ladder 1v1 Random Map.
-leaderboard <- get_leaderboard(leaderboard_id = 3, count = 100)
+# Top 1000 jogadores de uma ladder; a paginacao e automatica.
+ranking <- get_leaderboard(leaderboard_id = 3, count = 1000)
 
-# Traz todas as partidas recentes concluídas que envolvem um jogador.
-# O resultado tem uma linha por jogador por partida.
-matches <- get_player_matches(profile_id = 6174996)
+# Partidas recentes de qualquer quantidade de jogadores; as chamadas
+# sao divididas em lotes automaticamente e linhas repetidas sao removidas.
+matches <- get_player_matches(ranking$profile_id[1:100])
 
-# Busca um jogador e sua posição em cada ladder.
-profile <- get_player_profile(profile_id = 251265)
+# Posicao de um jogador em cada ladder (ou use alias = "TAG_MbL_").
+get_player_profile(profile_id = 251265)
 ```
 
-`get_player_profile()` também aceita um `alias` exato, sensível a maiúsculas e
-minúsculas:
+## Montando um dataset
+
+Uma chamada coleta o histórico recente de muitos jogadores de uma leaderboard:
 
 ```r
-get_player_profile(alias = "TAG_MbL_")
+dataset <- collect_match_dataset(
+  leaderboard_id = 3,
+  n_profiles = 1000,
+  path = "dados/coleta-rm",   # checkpoints; use NULL para manter em memoria
+  resume = TRUE
+)
 ```
 
-Aliases não são únicos. Uma busca por alias pode devolver vários jogadores;
-quando houver um identificador sem ambiguidade, use `profile_id`.
+O resultado é um tibble com uma linha por jogador por partida, deduplicado por
+`match_id` + `profile_id`. Salve uma vez e compartilhe o arquivo:
 
-## Funções principais
+```r
+save_match_dataset(dataset, "dados/dataset-rm.rds")
+
+# Qualquer pessoa reproduz sua analise a partir do mesmo snapshot:
+dataset <- readRDS("dados/dataset-rm.rds")
+```
+
+## Dados vivos vs. reprodutibilidade
+
+O backend é um serviço vivo: chamar `collect_match_dataset()` em outra data
+retorna o estado disponível naquele momento, que pode ser diferente de uma
+coleta anterior. Duas garantias decorrem disso:
+
+- **Análise reproduzível** — compartilhe o snapshot RDS salvo; ele sempre tem
+  as mesmas linhas.
+- **Dados atualizados** — chame a coleta novamente (use um novo `path` para
+  novos checkpoints). Não existe seed que congele o servidor.
+
+Um `path` que já existe é retomado, não atualizado silenciosamente.
+
+## Cuidados para machine learning
+
+- Divida treino e teste **por `match_id`**: jogadores da mesma partida devem
+  ficar no mesmo grupo.
+- Não use colunas pós-partida (`rating_after`, `rating_change`, `duration_s`,
+  `xp_gained`) como preditores do resultado.
+- Datas são `POSIXct` em UTC; `rank = -1` em um perfil significa que o jogador
+  não está ranqueado naquela ladder.
+
+## Funções
 
 | Função | Retorno |
 |---|---|
 | `get_available_leaderboards()` | Uma linha por ladder ranqueada disponível. |
-| `get_leaderboard()` | Uma linha por jogador de uma ladder. |
-| `get_player_matches()` | Uma linha por jogador por partida concluída. |
+| `get_leaderboard()` | Uma linha por jogador; `count` acima de 200 é paginado. |
+| `get_player_matches()` | Uma linha por jogador por partida; mais de 10 ids vão em lotes. |
 | `get_player_profile()` | Uma linha por ladder associada a um jogador. |
-
-Datas são retornadas como `POSIXct` em UTC. Em um perfil, `rank = -1` significa
-que o jogador não está ranqueado naquela ladder.
+| `collect_match_dataset()` | Dataset jogador-partida deduplicado, com checkpoints opcionais. |
+| `save_match_dataset()` | Grava um dataset em RDS sem sobrescrever por acidente. |
 
 ## Desenvolvimento
 
@@ -147,10 +203,3 @@ Rscript -e 'testthat::test_local(".")'
 R CMD build .
 _R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.0.tar.gz --no-manual
 ```
-
-## Coletar uma amostra maior
-
-Para montar uma base pronta para analise a partir de muitos perfis de uma
-leaderboard, use `collect_match_dataset()`. Ela gerencia paginacao, tentativas,
-checkpoints e deduplicacao automaticamente. Salve o resultado com
-`save_match_dataset()` para compartilhar ou retomar depois.

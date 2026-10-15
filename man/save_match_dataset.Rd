@@ -19,3 +19,8 @@ save_match_dataset(dataset, file, overwrite = FALSE)
 \description{
 Saves a dataset returned by \code{\link[=collect_match_dataset]{collect_match_dataset()}} as an RDS file.
 }
+\examples{
+\dontrun{
+save_match_dataset(dataset, "dataset-rm.rds", overwrite = TRUE)
+}
+}

@@ -14,6 +14,11 @@
 #' @return A tibble with collection metadata in its `collection_metadata`
 #'   attribute.
 #' @export
+#' @examples
+#' \dontrun{
+#' dataset <- collect_match_dataset(leaderboard_id = 3, n_profiles = 200)
+#' save_match_dataset(dataset, "dataset-rm.rds")
+#' }
 collect_match_dataset <- function(leaderboard_id = 3, n_profiles = 200,
                                   start = 1, path = NULL, resume = TRUE,
                                   pause = 1) {

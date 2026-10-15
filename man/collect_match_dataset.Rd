@@ -35,3 +35,9 @@ Selects players from one leaderboard, downloads their recent match history,
 and returns one deduplicated row per player per match. When \code{path} is set,
 checkpoints make an interrupted collection resumable.
 }
+\examples{
+\dontrun{
+dataset <- collect_match_dataset(leaderboard_id = 3, n_profiles = 200)
+save_match_dataset(dataset, "dataset-rm.rds")
+}
+}

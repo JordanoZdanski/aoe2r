@@ -8,6 +8,10 @@
 #'
 #' @return `file`, invisibly.
 #' @export
+#' @examples
+#' \dontrun{
+#' save_match_dataset(dataset, "dataset-rm.rds", overwrite = TRUE)
+#' }
 save_match_dataset <- function(dataset, file, overwrite = FALSE) {
   if (!inherits(dataset, "aoe2r_match_dataset")) {
     stop("`dataset` must come from `collect_match_dataset()`.", call. = FALSE)
