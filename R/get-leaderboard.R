@@ -1,13 +1,12 @@
 #' Leaderboard standings
 #'
-#' Fetches the ranked players of one ladder. Pagination is 1-based and the
-#' server rejects `count` above 200 with an HTTP 400, so oversized requests are
-#' caught here with a readable message instead.
+#' Fetches the ranked players of one ladder. Requests larger than 200 rows are
+#' paginated automatically.
 #'
 #' @param leaderboard_id Integer ladder id, as returned by
 #'   [get_available_leaderboards()].
 #' @param start Integer first rank to return (1 = best rank).
-#' @param count Integer rows to return, at most 200.
+#' @param count Integer rows to return.
 #'
 #' @return A tibble with one row per player: `leaderboard_id`, `rank`,
 #'   `profile_id`, `alias`, `rating`, `wins`, `losses`, `streak`, `drops`,
@@ -18,20 +17,22 @@
 #' get_leaderboard(leaderboard_id = 3, count = 100)
 #' }
 get_leaderboard <- function(leaderboard_id, start = 1, count = 100) {
-  if (length(leaderboard_id) != 1 || is.na(leaderboard_id)) {
-    stop("`leaderboard_id` must be a single number.", call. = FALSE)
-  }
-  if (count > 200) {
-    stop("`count` cannot exceed 200; the server rejects it with HTTP 400.",
-         call. = FALSE)
-  }
+  ao_check_integer(leaderboard_id, "leaderboard_id", 1)
+  ao_check_integer(start, "start", 1)
+  ao_check_integer(count, "count", 1)
 
-  payload <- ao_request("getLeaderBoard2", list(
-    leaderboard_id = leaderboard_id,
-    sortBy = 1,
-    start = start,
-    count = count
-  ))
+  starts <- seq.int(start, length.out = ceiling(count / 200), by = 200)
+  pages <- lapply(starts, function(page_start) {
+    page_count <- min(200L, start + count - page_start)
+    payload <- ao_request("getLeaderBoard2", list(
+      leaderboard_id = leaderboard_id,
+      sortBy = 1,
+      start = page_start,
+      count = page_count
+    ))
+    parse_leaderboard(payload)
+  })
 
-  parse_leaderboard(payload)
+  rows <- sum(vapply(pages, nrow, integer(1)))
+  tibble::as_tibble(do.call(rbind, pages))[seq_len(min(count, rows)), ]
 }

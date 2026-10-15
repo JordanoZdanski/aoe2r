@@ -12,7 +12,7 @@ get_leaderboard(leaderboard_id, start = 1, count = 100)
 
 \item{start}{Integer first rank to return (1 = best rank).}
 
-\item{count}{Integer rows to return, at most 200.}
+\item{count}{Integer rows to return.}
 }
 \value{
 A tibble with one row per player: \code{leaderboard_id}, \code{rank},
@@ -20,9 +20,8 @@ A tibble with one row per player: \code{leaderboard_id}, \code{rank},
 \code{rank_total} and \code{last_match} (POSIXct, UTC).
 }
 \description{
-Fetches the ranked players of one ladder. Pagination is 1-based and the
-server rejects \code{count} above 200 with an HTTP 400, so oversized requests are
-caught here with a readable message instead.
+Fetches the ranked players of one ladder. Requests larger than 200 rows are
+paginated automatically.
 }
 \examples{
 \dontrun{

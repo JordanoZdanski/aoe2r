@@ -1,13 +1,33 @@
 # Centraliza HTTP para manter funcoes publicas sem transporte.
 
-ao_request <- function(endpoint, query = list()) {
+ao_request <- function(endpoint, query = list(), retries = 3, timeout_s = 30) {
   url <- httr::modify_url(
     AOE2_HOST,
     path  = paste(AOE2_PATH, endpoint, sep = "/"),
     query = c(list(title = AOE2_TITLE), query)
   )
 
-  resp <- httr::GET(url, httr::user_agent(AOE2_USER_AGENT))
+  retries <- ao_check_integer(retries, "retries", 1)
+  ao_check_nonnegative(timeout_s, "timeout_s")
+
+  resp <- NULL
+  for (attempt in seq_len(retries)) {
+    resp <- tryCatch(
+      httr::GET(url, httr::user_agent(AOE2_USER_AGENT), httr::timeout(timeout_s)),
+      error = identity
+    )
+    if (!inherits(resp, "error")) {
+      status <- httr::status_code(resp)
+      if (!ao_retry_status(status) || attempt == retries) {
+        break
+      }
+    } else if (attempt == retries) {
+      stop(sprintf("Request to '%s' failed: %s.", endpoint, conditionMessage(resp)),
+           call. = FALSE)
+    }
+    Sys.sleep(2 ^ (attempt - 1L))
+  }
+
   httr::stop_for_status(resp)
 
   payload <- jsonlite::fromJSON(
@@ -18,6 +38,8 @@ ao_request <- function(endpoint, query = list()) {
   ao_check_result(payload, endpoint)
   payload
 }
+
+ao_retry_status <- function(status) status == 429 || status >= 500
 
 # Erros de dominio chegam em HTTP 200; verificar result.code.
 ao_check_result <- function(payload, endpoint) {

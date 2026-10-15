@@ -64,16 +64,15 @@ directory, run:
 ```bash
 Rscript -e 'testthat::test_local(".")'
 R CMD build .
-_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.1.1.tar.gz --no-manual
+_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.0.tar.gz --no-manual
 ```
 
 ## Collecting a larger sample
 
-The package API remains limited to its four data-access functions. For an
-analysis-ready sample built from many leaderboard profiles, use the resumable
-collection utility in [`tools/coletar-partidas.R`](tools/coletar-partidas.R).
-It saves checkpoints, retries transient failures, and removes repeated
-player-match rows. See the [collection guide](tools/COLETA-DE-DADOS.md).
+For an analysis-ready dataset built from many leaderboard profiles, use
+`collect_match_dataset()`. It handles pagination, retries, checkpointing, and
+deduplication automatically. Save the result with `save_match_dataset()` to
+share or resume later.
 
 ---
 
@@ -146,14 +145,12 @@ rede. A partir da pasta do pacote, rode:
 ```bash
 Rscript -e 'testthat::test_local(".")'
 R CMD build .
-_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.1.1.tar.gz --no-manual
+_R_CHECK_FORCE_SUGGESTS_=false R CMD check aoe2r_0.2.0.tar.gz --no-manual
 ```
 
 ## Coletar uma amostra maior
 
-A API do pacote continua limitada as quatro funcoes de acesso a dados. Para
-montar uma amostra pronta para analise a partir de muitos perfis de uma
-leaderboard, use o utilitario retomavel em
-[`tools/coletar-partidas.R`](tools/coletar-partidas.R). Ele salva checkpoints,
-repete falhas transitorias e remove linhas jogador-partida repetidas. Veja o
-[guia de coleta](tools/COLETA-DE-DADOS.md).
+Para montar uma base pronta para analise a partir de muitos perfis de uma
+leaderboard, use `collect_match_dataset()`. Ela gerencia paginacao, tentativas,
+checkpoints e deduplicacao automaticamente. Salve o resultado com
+`save_match_dataset()` para compartilhar ou retomar depois.

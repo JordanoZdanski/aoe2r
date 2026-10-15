@@ -4,11 +4,13 @@
 \alias{get_player_matches}
 \title{Match history for one or more players}
 \usage{
-get_player_matches(profile_id)
+get_player_matches(profile_id, pause = 0)
 }
 \arguments{
-\item{profile_id}{Integer Relic profile id (or a vector of up to ten). Get
+\item{profile_id}{Integer Relic profile id (or a vector). Get
 one from \code{\link[=get_leaderboard]{get_leaderboard()}} or \code{\link[=get_player_profile]{get_player_profile()}}.}
+
+\item{pause}{Seconds to wait between batches.}
 }
 \value{
 A tibble with one row per player per match: \code{match_id},
@@ -22,10 +24,8 @@ Returns completed matches as one row \strong{per player}, not per match, so the
 result feeds straight into tidymodels without \code{tidyr::unnest()}.
 }
 \details{
-Several players can be requested at once. The backend accepts up to ten
-\code{profile_id} per call and returns the full history of every player named,
-including the opponents they faced -- so ten ids easily yield thousands of
-rows in a single request.
+Any number of players can be requested. The backend accepts ten \code{profile_id}
+values per request, so larger inputs are split into batches automatically.
 
 Only finished matches appear. There is no endpoint for in-progress games.
 }
